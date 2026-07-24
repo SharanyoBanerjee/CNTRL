@@ -1,5 +1,4 @@
-import { Component, createSignal, onMount, For, Show } from "solid-js";
-import { macroState, macroActions } from "../stores/macroStore";
+import { Component, createSignal, onMount, onCleanup, For, Show } from "solid-js";import { macroState, macroActions } from "../stores/macroStore";
 import "./MacroLibrary.css";
 
 interface MacroLibraryProps {
@@ -11,11 +10,18 @@ export const MacroLibrary: Component<MacroLibraryProps> = (props) => {
   const [scheduleCron, setScheduleCron] = createSignal("");
   const [activeScheduleId, setActiveScheduleId] = createSignal<string | null>(null);
 
-  onMount(() => {
+onMount(() => {
     macroActions.fetchMacros();
     macroActions.fetchScheduled();
-  });
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        props.onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    onCleanup(() => window.removeEventListener("keydown", handleKeyDown));
+  });
   const handleStopRecording = async () => {
     if (!macroName()) return;
     try {
@@ -28,14 +34,19 @@ export const MacroLibrary: Component<MacroLibraryProps> = (props) => {
 
   return (
     <div class="macro-library-overlay" onClick={props.onClose}>
-      <div class="macro-library-modal" onClick={(e) => e.stopPropagation()}>
+<div
+        class="macro-library-modal"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="macro-library-heading"
+      >
         <div class="macro-library-header">
-          <h2>Macro Library (Vibe Automations)</h2>
-          <button class="macro-library-close" onClick={props.onClose}>
+          <h2 id="macro-library-heading">Macro Library (Vibe Automations)</h2>
+          <button class="macro-library-close" onClick={props.onClose} aria-label="Close macro library">
             ✕
           </button>
         </div>
-
         <div class="macro-library-content">
           {/* Recording Controls */}
           <div class="macro-recording-controls">
@@ -49,14 +60,14 @@ export const MacroLibrary: Component<MacroLibraryProps> = (props) => {
             >
               <div class="macro-save-form">
                 <div class="schedule-badge">● RECORDING</div>
-                <input
+<input
                   type="text"
                   class="macro-input"
+                  aria-label="Macro name"
                   placeholder="Name your macro..."
                   value={macroName()}
                   onInput={(e) => setMacroName(e.currentTarget.value)}
-                />
-                <button class="btn-primary" onClick={handleStopRecording} disabled={!macroName()}>
+                />                <button class="btn-primary" onClick={handleStopRecording} disabled={!macroName()}>
                   Save Macro
                 </button>
                 <button class="btn-danger" onClick={() => macroActions.cancelRecording()}>
@@ -101,13 +112,13 @@ export const MacroLibrary: Component<MacroLibraryProps> = (props) => {
                               }
                             >
                               <div class="macro-schedule-form">
-                                <input
+<input
                                   type="text"
+                                  aria-label={`Schedule for ${macro.name} (cron expression)`}
                                   placeholder="* * * * * *"
                                   value={scheduleCron()}
                                   onInput={(e) => setScheduleCron(e.currentTarget.value)}
-                                />
-                                <button
+                                />                                <button
                                   class="btn-primary"
                                   onClick={async () => {
                                     if (scheduleCron()) {

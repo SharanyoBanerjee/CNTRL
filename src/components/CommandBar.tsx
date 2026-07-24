@@ -115,16 +115,20 @@ export const CommandBar: Component = () => {
 
   return (
     <Show when={isOpen()}>
-      <div class="cmd-bar-overlay" onClick={(e) => { if (e.target === e.currentTarget) setIsOpen(false); }}>
-        <div class={`cmd-bar ${isPrivacyEnabled() ? "privacy-active" : ""}`}>
-          <form class="cmd-bar-input-wrapper" onSubmit={handleSubmit}>
+<div class="cmd-bar-overlay" onClick={(e) => { if (e.target === e.currentTarget) setIsOpen(false); }}>
+        <div
+          class={`cmd-bar ${isPrivacyEnabled() ? "privacy-active" : ""}`}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Command bar"
+        >          <form class="cmd-bar-input-wrapper" onSubmit={handleSubmit}>
             <SparklesIcon />
             <input
-              ref={inputRef}
+ref={inputRef}
               class="cmd-bar-input"
               type="text"
-              placeholder="What do you want to do? (e.g. 'go to github', 'bitcoin price')"
-              value={input()}
+              aria-label="Command input"
+              placeholder="What do you want to do? (e.g. 'go to github', 'bitcoin price')"              value={input()}
               onInput={(e) => setInput(e.currentTarget.value)}
               disabled={isProcessing()}
               autocomplete="off"
