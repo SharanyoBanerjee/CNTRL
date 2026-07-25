@@ -22,15 +22,22 @@ export const TabBar: Component = () => {
     <div 
       class="tab-bar" 
       data-tauri-drag-region 
+      role="tablist"
+      aria-label="Open tabs"
       style={isMacOS() ? { 'padding-left': '72px' } : {}}
     >
       <For each={browserState.tabs.filter(t => !t.is_background)}>
         {(tab) => (
           <div
-            class={`tab ${browserState.activeTabId === tab.id ? 'active' : ''}`}
+class={`tab ${browserState.activeTabId === tab.id ? 'active' : ''}`}
             onClick={() => browserActions.setActiveTab(tab.id)}
-            role="tab"
-            tabindex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                browserActions.setActiveTab(tab.id);
+              }
+            }}
+            role="tab"            tabindex={0}
             aria-selected={browserState.activeTabId === tab.id}
             title={tab.title}
           >
