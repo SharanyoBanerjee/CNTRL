@@ -1,44 +1,38 @@
-# Accessibility Guide
+# Accessibility Guide — CNTRL Browser
 
-## Overview
+CNTRL Browser prioritizes inclusive, high-contrast, and screen-reader accessible user experiences across all desktop operating systems.
 
-This document describes the keyboard accessibility improvements made to the CNTRL Browser main window and explains how to verify the focus order.
+## 1. High-Contrast Theme (`data-theme="high-contrast"`)
 
-## Keyboard Focus Order
+Users can enable High-Contrast mode in Settings → Appearance or by applying `data-theme="high-contrast"` on the root document element.
 
-The primary controls can be reached using the **Tab** key in the following order:
+### High-Contrast Color Tokens
+- **Background Base**: `#000000` (Pure Black)
+- **Borders**: `#ffffff` (Pure White)
+- **Active Focus & Accent**: `#ffff00` (High-Contrast Yellow)
+- **Primary Text**: `#ffffff` (Pure White)
+- **Danger Text**: `#ff0000` (Pure Red)
+- **Success Text**: `#00ff00` (Pure Green)
 
-1. Back button
-2. Forward button
-3. Reload / Stop button
-4. Address bar
-5. Settings button
-6. Browser tabs
-7. Close tab buttons
-8. New tab button
-9. Window controls (Windows only)
+---
 
-## Accessibility Improvements
+## 2. Screen-Reader & ARIA Labels
 
-- Added descriptive `aria-label` attributes to navigation buttons.
-- Added an `aria-label` to the address bar.
-- Added an `aria-label` to the Settings button.
-- Added an `aria-label` to the New Tab button.
-- Added `role="tab"` and `tabindex="0"` to browser tabs.
-- Added `aria-selected` to indicate the active tab.
-- Added descriptive labels for tab close buttons.
+- All interactive buttons (`TabBar.tsx`, `UrlBar.tsx`, `WindowControls.tsx`) include explicit `aria-label` or `title` attributes.
+- Input elements include associated `<label>` tags with matching `for` attributes.
+- Model lists and score lists include `role="list"` and `role="listitem"` tags.
+- Decorative SVG icons include `aria-hidden="true"`.
 
-## Verification Steps
+---
 
-1. Start the application.
-2. Press the **Tab** key repeatedly.
-3. Verify each primary control receives focus in a logical order.
-4. Verify screen readers announce each control correctly.
-5. Press **Shift + Tab** to verify reverse navigation.
-6. Ensure the active tab exposes `aria-selected="true"`.
+## 3. Keyboard Navigation Shortcuts
 
-## Expected Result
-
-- All primary controls are keyboard accessible.
-- Focus order is predictable and logical.
-- Screen readers announce meaningful labels.
+- `⌘L` / `Ctrl+L`: Focus Address Bar
+- `⌘T` / `Ctrl+T`: Open New Tab (`cntrl://home`)
+- `⌘W` / `Ctrl+W`: Close Active Tab
+- `⌘Shift+T`: Reopen Last Closed Tab
+- `⌘K`: Open AI Command Bar
+- `⌘M`: Toggle Macro Library
+- `⌘/`: View All Keyboard Shortcuts Modal
+- `⌘F`: Find in Page Overlay
+- `⌘P`: Print / Export PDF

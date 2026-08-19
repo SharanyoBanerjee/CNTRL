@@ -1,49 +1,55 @@
 # Design System & Aesthetics — CNTRL Browser
 
-CNTRL Browser follows a **Mecha-Industrial Design System**: a sleek, dark-first, precision aesthetic with vibrant cyan/amber accents, subtle glassmorphic surfaces, and crisp typography.
+CNTRL Browser follows a **Mecha-Industrial Design System**: a sleek, dark-first, precision aesthetic with vibrant cyan/amber accents, subtle glassmorphic surfaces, crisp typography, and a 100% vector SVG icon design system (zero emojis).
 
 ---
 
-## 1. Color Palette & Tokens
+## 1. Color Palette & Theme Tokens
 
 All styles are powered by CSS Custom Properties defined in `src/styles/tokens.css`.
 
 ### Core Tokens
 ```css
-:root {
-  /* Dark Theme Default */
-  --color-bg-base: #0a0c10;
-  --color-bg-surface: #12161f;
-  --color-bg-elevated: #1a202c;
-  
-  --color-border: #2d3748;
-  --color-border-active: #4a5568;
-  
-  --color-text-primary: #f7fafc;
-  --color-text-secondary: #a0aec0;
-  --color-text-muted: #718096;
-  
-  --color-accent: #00f2fe;        /* Cyan Glow */
-  --color-accent-hover: #4facfe;  /* Electric Blue */
-  --color-accent-amber: #ffb703;  /* Industrial Amber */
-  --color-danger: #ff4757;        /* Warning Red */
-  --color-success: #2ed573;       /* Mint Green */
+:root, [data-theme="dark"] {
+  --color-bg-base: #0e0e0e;
+  --color-bg-panel: #161616;
+  --color-bg-elevated: #1f1f1f;
+  --color-border: #2a2a2a;
+  --color-border-active: #3d3d3d;
+  --color-accent: #e8a020;        /* Amber Glow */
+  --color-accent-dim: #7a5210;
+  --color-text-primary: #e8e6e0;
+  --color-text-secondary: #888480;
+  --color-text-danger: #e05555;
+  --color-text-success: #55a855;
 }
 
 [data-theme="light"] {
-  --color-bg-base: #f8fafc;
-  --color-bg-surface: #ffffff;
-  --color-bg-elevated: #edf2f7;
-  
-  --color-border: #e2e8f0;
-  --color-border-active: #cbd5e0;
-  
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #475569;
-  --color-text-muted: #94a3b8;
-  
-  --color-accent: #0284c7;
-  --color-accent-hover: #0369a1;
+  --color-bg-base: #f9f9f9;
+  --color-bg-panel: #f0f0f0;
+  --color-bg-elevated: #ffffff;
+  --color-border: #d0d0d0;
+  --color-border-active: #b0b0b0;
+  --color-accent: #d88c0c;
+  --color-accent-dim: #f3d4a0;
+  --color-text-primary: #1c1c1c;
+  --color-text-secondary: #666666;
+  --color-text-danger: #d03030;
+  --color-text-success: #308c30;
+}
+
+[data-theme="high-contrast"] {
+  --color-bg-base: #000000;
+  --color-bg-panel: #000000;
+  --color-bg-elevated: #111111;
+  --color-border: #ffffff;
+  --color-border-active: #ffff00;
+  --color-accent: #ffff00;        /* High-contrast yellow */
+  --color-accent-dim: #888800;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #ffffff;
+  --color-text-danger: #ff0000;
+  --color-text-success: #00ff00;
 }
 ```
 
@@ -63,11 +69,21 @@ All styles are powered by CSS Custom Properties defined in `src/styles/tokens.cs
 
 ---
 
-## 3. UI Components & Micro-Interactions
+## 3. Vector SVG Icon System (`Icons.tsx`)
+
+All UI components exclusively use clean, 16px/14px vector SVG components (`Icons.tsx`):
+
+- **Navigation**: `BackIcon`, `ForwardIcon`, `ReloadIcon`, `StopIcon`
+- **Security & Privacy**: `LockIcon`, `AlertIcon`, `ShieldIcon`
+- **Feature Surfaces**: `SettingsIcon`, `PluginIcon`, `AuditIcon`, `HistoryIcon`, `DownloadIcon`, `BookmarkIcon`, `KeyboardIcon`, `TrashIcon`, `ExternalLinkIcon`, `SparklesIcon`
+
+---
+
+## 4. UI Components & Micro-Interactions
 
 1. **Tab Bar (`TabBar.css`)**:
    - Active tabs feature a subtle top border highlight with background elevation.
-   - Smooth 150ms cubic-bezier transitions on hover and active state change.
+   - Smooth 120ms cubic-bezier transitions on hover and active state change.
 2. **Command Bar Overlay (`CommandBar.css`)**:
    - Fixed centered modal with backdrop blur (`backdrop-filter: blur(12px)`).
    - Live streaming step feed with animated status dots.

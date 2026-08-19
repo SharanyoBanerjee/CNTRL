@@ -1,191 +1,53 @@
-# Architecture
+# Architecture & System Design — CNTRL Browser
 
-CNTRL Browser is split into a SolidJS frontend and a Tauri v2 Rust backend. The frontend owns browser chrome and user interaction. The backend owns native webviews, tab lifecycle operations, fallback fetching, and AI-provider routing.
+CNTRL Browser is split into a SolidJS frontend (TypeScript) and a Tauri v2 Rust backend with an integrated **Chromium Base Engine Controller (`ChromiumManager`)**.
 
-## Runtime Flow
+## Runtime Architecture Flow
 
 ```text
 User
   -> SolidJS UI
-  -> Solid stores
-  -> Tauri invoke commands
-  -> Rust command handlers
-  -> Rust services
-  -> Native child webviews, fallback fetcher, or AI providers
+  -> Solid Stores / Decoupled EventBus
+  -> Tauri IPC Commands
+  -> Rust Services (BrowserService, ChromiumManager, AiRouter, Keychain, Memory)
+  -> Native Webviews / Chromium CDP Engine Target
 ```
 
-## Frontend
+## Frontend Architecture
 
-The frontend lives in `src/`.
+Lives in `src/`:
 
-Important areas:
+- `src/App.tsx`: Root shell initializing AI store, macro store, `cntrl://home` default tab, keyboard listeners (`Cmd+/`, `Cmd+F`, `Cmd+P`), and `FirstRunConsent`.
+- `src/components/WebView.tsx`: Client-side & IPC router handling `cntrl://home`, `cntrl://settings`, `cntrl://plugins`, `cntrl://audit`, `cntrl://history`, `cntrl://downloads`, `cntrl://bookmarks`.
+- `src/components/HomePage.tsx`: Custom CNTRL intent landing page (`cntrl://home`).
+- `src/components/HistoryPage.tsx`: Browsing history manager (`cntrl://history`).
+- `src/components/DownloadsPage.tsx`: Downloads manager (`cntrl://downloads`).
+- `src/components/BookmarksPage.tsx`: Bookmarks manager (`cntrl://bookmarks`).
+- `src/components/ShortcutsModal.tsx`: Keyboard keybindings discovery modal (`Cmd+/` / `cntrl://shortcuts`).
+- `src/components/GuardrailDialog.tsx`: Confirmation modal for high-risk autonomous AI actions.
+- `src/components/FirstRunConsent.tsx`: Privacy onboarding modal.
+- `src/components/Icons.tsx`: 100% vector SVG icon components (zero emojis).
 
-- `src/App.tsx`: initializes AI config, fetches tabs, and opens the initial tab.
-- `src/components/TabBar.tsx`: visible tab list and new-tab controls.
-- `src/components/UrlBar.tsx`: URL input, navigation controls, and settings entrypoint.
-- `src/components/WebView.tsx`: main browser viewport, internal settings page, fallback iframe rendering, and child-webview bounds sync.
-- `src/components/SettingsPage.tsx`: AI tier, provider key, model selection, AI test, and intent router test UI.
-- `src/stores/browserStore.ts`: browser state and Tauri command wrappers.
-- `src/stores/aiStore.ts`: AI config state and Tauri command wrappers.
+## Backend Architecture
 
-## Backend
+Lives in `src-tauri/src/`:
 
-The backend lives in `src-tauri/src/`.
+- `lib.rs`: Registers plugins (shell, opener, os, keyring, notification), SQLite database (`cntrl-browser.db`), and commands.
+- `services/chromium.rs`: `ChromiumManager` providing OS binary discovery, launch parameter configuration (`--remote-debugging-port=9222`), and CDP JSON-RPC command serialization (`Page.navigate`, `Runtime.evaluate`, `Target.createTarget`).
+- `services/browser.rs`: Manages tab lifecycle (`BrowserService`). Keeps native OS child webviews hidden for `cntrl://` routes to prevent overlay blocking.
+- `services/ai/router.rs`: 3-tier model router (Tier 1 Ollama, Tier 2 Gemini/Groq/HF/OpenRouter, Tier 3 OpenAI-compat).
+- `services/keychain.rs`: OS Keychain integration (macOS Keychain, Windows Credential Manager, Linux Secret Service).
+- `services/memory/db.rs`: Transactional SQLite persistence via `sqlx` and LanceDB vector recall.
 
-Important areas:
+## Development Task Reference Table
 
-- `lib.rs`: configures plugins, initializes services, and registers Tauri commands.
-- `commands/browser.rs`: exposes tab and navigation commands.
-- `commands/ai.rs`: exposes AI config and model commands.
-- `services/browser.rs`: manages tab state and Tauri child webviews.
-- `services/ai_router.rs`: stores model config and routes requests to Ollama or OpenRouter-compatible APIs.
-- `services/fallback.rs`: fetches fallback HTML for compatibility mode.
-- `error.rs`: shared error type.
-
-## Browser Service
-
-`BrowserService` stores tab state in an `Arc<RwLock<BrowserState>>`.
-
-Each tab contains:
-
-- UUID.
-- URL.
-- Title.
-- Background-tab flag.
-- Creation timestamp.
-- Fallback-mode flag.
-- Loaded flag.
-
-When a tab opens, the backend creates a Tauri child webview using the label `tab-{uuid}`. Inactive tabs are hidden. Active tabs are shown unless they are internal pages or in fallback mode.
-
-Navigation starts a timeout. If a page does not report loaded within the timeout window, the tab enters compatibility mode and the native child webview is hidden.
-
-## Fallback Rendering
-
-When a tab enters fallback mode, the frontend calls `fetch_fallback` and renders the returned HTML inside an iframe with:
-
-```text
-sandbox="allow-scripts allow-forms"
-```
-
-This is useful as a compatibility path, but it must be treated as security-sensitive. Public releases should document and test the fallback model carefully.
-
-## AI Router
-
-`AiRouter` stores a `ModelConfig` containing:
-
-- Selected tier.
-- OpenRouter key placeholder.
-- Ollama URL.
-- Selected model.
-
-Routing behavior:
-
-- `Local` sends prompts to Ollama `/api/generate`.
-- `Freemium` sends prompts to OpenRouter chat completions.
-- `Premium` currently also sends prompts through OpenRouter chat completions.
-
-The intent scoring helper is rule-based:
-
-- Privacy, offline, and local intents route to `Local`.
-- Code, analysis, complex, and reasoning intents route to `Premium`.
-- Other intents route to `Freemium`.
-
-## Internal Pages
-
-The current internal page is:
-
-```text
-cntrl://settings
-```
-
-The URL bar navigates to this internal route, and `WebView.tsx` renders the settings component instead of showing a native child webview.
-
-## Events
-
-The backend emits:
-
-```text
-tabs-updated
-```
-
-The frontend listens for this event and refreshes tab state.
-
-## Security Notes
-
-The app currently disables or relaxes some CSP behavior in `src-tauri/tauri.conf.json`. This is acceptable for early prototyping, but public releases should define stricter security controls before inviting broad usage.
-
-High-priority hardening areas:
-
-- Tauri CSP.
-- Tauri capabilities.
-- Fallback HTML sanitization and iframe sandbox policy.
-- Webview navigation restrictions.
-- Provider key storage.
-- Future autonomous action permissions.
-
-## Which file should I edit?
-
-The table below provides a quick reference for common development tasks.
-
-| Task                                    | File / Directory                      |
-| --------------------------------------- | ------------------------------------- |
-| Change the main application layout      | `src/App.tsx`                         |
-| Modify the URL bar                      | `src/components/UrlBar.tsx`           |
-| Update browser tabs                     | `src/components/TabBar.tsx`           |
-| Change the embedded webview behavior    | `src/components/WebView.tsx`          |
-| Update the Settings page                | `src/components/SettingsPage.tsx`     |
-| Modify browser state management         | `src/stores/browserStore.ts`          |
-| Update AI configuration state           | `src/stores/aiStore.ts`               |
-| Add or modify a Tauri command           | `src-tauri/src/commands/`             |
-| Change backend browser services         | `src-tauri/src/services/browser.rs`   |
-| Modify AI routing logic                 | `src-tauri/src/services/ai_router.rs` |
-| Update Tauri configuration              | `src-tauri/tauri.conf.json`           |
-| Change frontend dependencies or scripts | `package.json`                        |
-| Update Rust dependencies                | `src-tauri/Cargo.toml`                |
-| Replace application icons               | `src-tauri/icons/`                    |
-| Modify global design tokens             | `src/styles/tokens.css`               |
-
-## Common Development Commands
-
-```bash
-# Install frontend dependencies
-npm install
-
-# Start the development application
-npm run tauri dev
-
-# Run frontend tests
-npm test
-
-# Format Rust code
-cargo fmt
-
-# Run Rust tests
-cargo test
-```
-
-## Repository Layout
-
-```
-CNTRL/
-├── src/                  # SolidJS frontend
-│   ├── components/       # UI components
-│   ├── stores/           # Application state
-│   ├── styles/           # Shared styles
-│   └── assets/           # Frontend assets
-│
-├── src-tauri/            # Rust backend
-│   ├── src/
-│   │   ├── commands/     # Tauri commands
-│   │   ├── services/     # Backend services
-│   │   ├── lib.rs        # Backend initialization
-│   │   └── main.rs       # Application entry point
-│   ├── Cargo.toml
-│   └── tauri.conf.json
-│
-├── public/               # Static frontend assets
-├── package.json
-└── docs/
-
-```
+| Task | File / Directory |
+|---|---|
+| Main App Layout & Listeners | `src/App.tsx` |
+| `cntrl://` Internal Router | `src/components/WebView.tsx` |
+| Chromium CDP Controller | `src-tauri/src/services/chromium.rs` |
+| Native Webview Service | `src-tauri/src/services/browser.rs` |
+| Vector SVG Icon Suite | `src/components/Icons.tsx` |
+| Settings & Data Control | `src/components/SettingsPage.tsx` |
+| Keychain & Key Management | `src-tauri/src/services/keychain.rs` |
+| Global Design Tokens | `src/styles/tokens.css` |

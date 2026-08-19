@@ -5,7 +5,7 @@
 **CNTRL Browser** is a next-generation, local-first, intent-based autonomous web browser. Designed for privacy-conscious power users, developers, and AI enthusiasts, CNTRL bridges the gap between traditional manual web navigation and fully autonomous AI agents.
 
 ### Core Aim
-To empower users to navigate, automate, and interact with the web through natural language intents, backed by local/hybrid LLMs, secure memory engines, a unified **Chromium base browser engine**, and zero-plaintext key storage.
+To empower users to navigate, automate, and interact with the web through natural language intents, backed by local/hybrid LLMs, secure memory engines, a unified **Chromium base browser engine (CDP)**, pixel-perfect vector SVG interface icons, and zero-plaintext key storage.
 
 ---
 
@@ -17,14 +17,19 @@ To empower users to navigate, automate, and interact with the web through natura
 
 ---
 
-## 3. Capabilities Built to Date
+## 3. Capabilities Built to Date (v0.2.0-beta Release)
 
-CNTRL Browser has completed its 7-Phase architecture roadmap and Chromium Base Engine migration:
+CNTRL Browser has completed its 7-Phase architecture roadmap and v0.2.0-beta baseline feature suite:
 
 | Capability | Implementation Details |
 |---|---|
 | **Chromium Base Engine** | Unified Chromium engine controller (`ChromiumManager`) managing page navigation, DOM inspection, and target lifecycle via Chrome DevTools Protocol (CDP). |
-| **Native Webview Engine** | Multi-tab container using native OS child webviews integrated with Tauri v2 shell. |
+| **Internal `cntrl://` Router** | Client-side & IPC router mounted to `cntrl://home`, `cntrl://settings`, `cntrl://plugins`, `cntrl://audit`, `cntrl://history`, `cntrl://downloads`, `cntrl://bookmarks`. |
+| **Native Webview Isolation** | Multi-tab container using native OS child webviews integrated with Tauri v2 shell, keeping native overlays hidden for internal routes to prevent visual blocking. |
+| **Vector SVG Icon Suite** | 100% vector SVG icons (`Icons.tsx`) replacing all emojis across the entire UI interface. |
+| **Baseline Feature Suite** | History Manager (`cntrl://history`), Downloads Manager (`cntrl://downloads`), Bookmarks Manager (`cntrl://bookmarks`), Find in Page (`Cmd+F`), and Zoom controls. |
+| **Shortcut Discovery** | Interactive Keyboard Shortcut Modal (`Cmd+/` or `cntrl://shortcuts`) listing all keybindings. |
+| **Security & Guardrails** | Interactive Guardrail Modal (`GuardrailDialog.tsx`) for destructive action confirmation, First-Run Privacy Consent modal (`FirstRunConsent.tsx`), and one-click database memory purge. |
 | **Playwright Fallback Engine** | Headless fallback engine rendering complex or WebKit-hostile pages safely inside a sandboxed iframe. |
 | **Hybrid AI Brain** | 3-tier router supporting Tier 1 (Local Ollama), Tier 2 (Gemini, Groq, HuggingFace, OpenRouter), Tier 3 (OpenAI-compatible endpoints). |
 | **Secure Key Enclave** | 100% OS Keychain secret storage (macOS Keychain, Windows Credential Manager, Linux Secret Service). Zero plaintext API keys on disk. |
@@ -32,7 +37,7 @@ CNTRL Browser has completed its 7-Phase architecture roadmap and Chromium Base E
 | **Encrypted Memory Engine** | SQLite database (`cntrl-browser.db`) via `sqlx` for preferences and audit logs; LanceDB for semantic vector recall. |
 | **Privacy Guard** | Strict single-toggle privacy mode blocking all remote AI API calls when enabled. |
 | **Background Agents & Macros** | `.vibe` JSON macro recording, playback, and cron scheduling via `tokio-cron-scheduler`. |
-| **Unified Design System** | Mecha-Industrial visual design with dark/light mode toggle and custom CSS tokens. |
+| **Unified Design System** | Mecha-Industrial visual design with dark, light, and high-contrast (`data-theme="high-contrast"`) theme options. |
 | **WASM Plugin Sandbox** | Wasmtime sandbox runtime stub for secure, isolated third-party plugin execution. |
 
 ---
@@ -43,9 +48,9 @@ CNTRL Browser has completed its 7-Phase architecture roadmap and Chromium Base E
 - **Hurdle**: System-default webviews (WebKit on macOS vs WebView2 on Windows vs WebKitGTK on Linux) displayed inconsistent CSS/rendering and lacked deep automation APIs.
 - **Solution**: Integrated `ChromiumManager` via Chrome DevTools Protocol (CDP) WebSocket commands (`Page.navigate`, `Runtime.evaluate`, `Target.createTarget`), ensuring identical Chromium performance and DOM automation across all OSes.
 
-### 2. Webview Bounds Sizing & Positioning on macOS
-- **Hurdle**: Native child webviews created via `add_child` initially overlapped window controls and didn't resize correctly on Retina displays due to coordinate space mismatches.
-- **Solution**: Standardized on `LogicalPosition` and `LogicalSize` matching CSS layout coordinates, coupled with a `boundsReady` signal and main-thread `set_bounds` dispatch.
+### 2. Native Webview Overlay Prevention for Internal Routes
+- **Hurdle**: When opening internal `cntrl://` routes or `about:blank`, Tauri's child webviews drew unrendered blank surfaces over the main window, causing a full blank screen.
+- **Solution**: Explicitly configured `open_tab` and `set_active_tab` in `src-tauri/src/services/browser.rs` to keep child native webviews hidden (`.hide()`) for internal routes, allowing SolidJS pages (`HomePage`, `SettingsPage`, etc.) to render without interference.
 
 ### 3. Cross-Platform OS Keychain Integration
 - **Hurdle**: Inconsistent keychain backends across macOS, Windows, and Linux.
