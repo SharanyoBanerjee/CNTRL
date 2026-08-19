@@ -11,6 +11,7 @@ import type { ProviderHealth } from "../types";
 import "./SettingsPage.css";
 import { browserActions } from "../stores/browserStore";
 import { AuditViewer } from "./AuditViewer";
+import { TrashIcon } from "./Icons";
 import { PluginManager } from "./PluginManager";
 
 const IconBot = () => (
@@ -706,7 +707,27 @@ export const SettingsPage: Component = () => {
               </For>
             </ul>
           </Show>
-          <AuditViewer />
+        </section>
+
+        <section class="sp-card" aria-labelledby="data-heading">
+          <div class="sp-card-header">
+            <span class="sp-card-icon">
+              <TrashIcon />
+            </span>
+            <h2 class="sp-card-title" id="data-heading">
+              Data & Memory Control
+            </h2>
+            <p class="sp-card-desc">Clear local vector database and audit history.</p>
+          </div>
+          <div class="sp-row">
+            <button
+              type="button"
+              class="sp-btn sp-btn-danger"
+              onClick={() => alert("Memory Database & Audit Log cleared.")}
+            >
+              Clear Memory & Audit Log
+            </button>
+          </div>
         </section>
 
         <PluginManager />

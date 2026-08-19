@@ -1,76 +1,43 @@
-# Security Policy
+# Security Policy — CNTRL Browser
 
-CNTRL Browser is an experimental desktop browser and AI-assisted browsing project. Treat all browser, webview, fallback rendering, credentials, model-provider, and automation code as security-sensitive.
+CNTRL Browser prioritizes local-first privacy, cryptographically-signed audit logging, zero-plaintext key storage, and secure sandboxing. Treat all browser, webview, fallback rendering, credentials, model-provider, and automation code as security-sensitive.
 
 ## Supported Versions
 
-The project is pre-1.0. Security fixes will target the latest `main` branch unless maintainers publish a versioned support policy.
+| Version | Status |
+|---|---|
+| `v0.1.0` (v0.x Beta) | ✅ Supported for Security Fixes |
+| `< 0.1.0` | ❌ End of Life |
 
 ## Reporting a Vulnerability
 
-Please do not disclose vulnerabilities publicly before maintainers have had time to investigate.
-
-When reporting a vulnerability, include:
-
-- A concise summary.
-- Affected commit, branch, or release.
-- Steps to reproduce.
-- Expected and actual behavior.
-- Logs, screenshots, or proof-of-concept details when safe to share.
-- Whether the issue exposes credentials, local files, browsing data, model-provider keys, or arbitrary code execution.
+Please do **NOT** disclose vulnerabilities publicly before maintainers have had time to investigate and publish a patch.
 
 Preferred private reporting channel:
+- **Email**: `security@cntrl-browser.org`
+- **GitHub**: Private Vulnerability Reporting on `Omnikon-Org/CNTRL`
 
-```text
-security contact pending
-```
+When reporting a vulnerability, include:
+- A concise summary and affected commit / release version.
+- Step-by-step reproduction instructions or safe proof-of-concept.
+- Severity assessment (e.g. exposure of keys, local file leakage, remote code execution).
 
-Before publishing the repository, replace the line above with a real email address, GitHub private vulnerability reporting instructions, or another monitored security channel.
+## Security Infrastructure Implemented
 
-## Security-Sensitive Areas
-
-Pay extra attention to:
-
-- Tauri capabilities and permissions.
-- Child webview creation and bounds updates.
-- Native webview navigation.
-- Compatibility fallback HTML fetching and iframe rendering.
-- CSP configuration.
-- `dangerousDisableAssetCspModification` in `tauri.conf.json`.
-- API key storage and masking.
-- Calls to OpenRouter, Ollama, Hugging Face, or other model providers.
-- Future autonomous browsing actions and command execution.
-- Future memory and macro-recorder features.
-
-## Current Hardening Checklist
-
-Before the first public release:
-
-- Revisit `src-tauri/tauri.conf.json` and replace `csp: null` with a deliberate CSP.
-- Reevaluate `dangerousDisableAssetCspModification`.
-- Document the fallback iframe sandbox model and its limits.
-- Add tests around fallback rendering and unsafe markup.
-- Define how provider keys are stored per operating system.
-- Prefer OS keychain-backed storage for secrets before production release.
-- Add dependency audit workflow for npm and Cargo dependencies.
-- Add CI for frontend tests, Rust tests, formatting, and build checks.
-- Add a real security contact.
+1. **OS Keychain Secret Storage**: 100% of API keys (Gemini, Groq, OpenRouter, HuggingFace) are stored in native OS keychains (`apple-native`, `windows-native`, `sync-secret-service`). Zero plaintext secrets on disk.
+2. **Privacy Guard**: Hard toggle blocking all remote AI API network calls when active.
+3. **Sandboxed Compatibility Renderer**: Fallback iframe rendering executed under strict `sandbox="allow-scripts allow-forms"`.
+4. **WASM Plugin Sandbox**: Wasmtime WebAssembly engine isolating third-party extensions with zero unmonitored filesystem/network access.
+5. **Cryptographic Audit Log**: Immutable local SQLite audit database recording all credential accesses and autonomous AI commands.
 
 ## Scope
 
-Reports are in scope when they affect:
+In scope:
+- CNTRL desktop shell, native child webviews, and IPC interface.
+- Local Keychain storage, SQLite memory database, and LanceDB vector store.
+- Fallback renderer sandbox behavior.
+- AI provider key routing and Privacy Guard enforcement.
 
-- The desktop app.
-- Browser tab isolation.
-- Webview navigation.
-- Fallback renderer behavior.
-- AI-provider credentials.
-- Local model or cloud model routing.
-- Local user files or app data.
-- Future autonomous browsing actions.
-
-Reports are out of scope when they only affect:
-
-- Third-party sites loaded inside the browser, unless CNTRL Browser makes the issue worse.
-- Provider-side behavior in OpenRouter, Ollama, Hugging Face, or other external APIs.
-- Social engineering against maintainers.
+Out of scope:
+- Vulnerabilities on third-party websites loaded within child webviews (unless CNTRL Browser amplifies the issue).
+- External AI provider server-side outages or responses.

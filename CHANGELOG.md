@@ -2,10 +2,23 @@
 
 All notable changes to the CNTRL Browser project will be documented in this file.
 
-## [Unreleased]
+## [0.2.0-beta] - 2026-08-19
+
+### Added
+- **Internal Router & Landing Page**: Added `cntrl://` internal client & IPC routing mounted to `cntrl://home`, `cntrl://settings`, `cntrl://plugins`, `cntrl://audit`, `cntrl://history`, `cntrl://downloads`, and `cntrl://bookmarks`.
+- **Chromium Base Engine (CDP)**: Integrated `ChromiumManager` (`src-tauri/src/services/chromium.rs`) for Chromium target discovery, launch flags, and CDP JSON-RPC commands.
+- **Baseline Feature Suite**:
+  - `HistoryPage` (`cntrl://history`) for date filtering & history clearing.
+  - `DownloadsPage` (`cntrl://downloads`) for download tracking & status monitoring.
+  - `BookmarksPage` (`cntrl://bookmarks`) & bookmark star control in `UrlBar.tsx`.
+  - `FindInPage` (`Cmd+F`) & Zoom shortcuts.
+  - `ShortcutsModal` (`Cmd+/` or `cntrl://shortcuts`) for full keyboard keybinding discovery.
+  - `FirstRunConsent` modal detailing local keychain security and zero-plaintext key storage.
+  - `GuardrailDialog` confirmation modal for high-risk autonomous AI operations.
+- **Accessibility & Themes**: High-contrast theme token set (`data-theme="high-contrast"`), font scaling multipliers, and screen-reader ARIA tags.
 
 ### Fixed
-- **CI Pipeline**: Restored 100% green CI pipeline across `npm run build`, Biome formatting, ESLint, TypeScript check, Vitest unit tests, Cargo clippy, Cargo fmt, and Cargo test suite.
+- **CI & Linter Baseline**: Restored 100% green pipeline across `cargo check`, `biome`, `eslint`, `typecheck`, and `vitest`.
 
 ## [0.1.0] - 2026-07-19
 

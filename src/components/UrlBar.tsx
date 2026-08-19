@@ -6,6 +6,8 @@ import "./UrlBar.css";
 import {
   AlertIcon,
   BackIcon,
+  BookmarkIcon,
+  ExternalLinkIcon,
   ForwardIcon,
   LockIcon,
   ReloadIcon,
@@ -183,12 +185,20 @@ export const UrlBar: Component = () => {
         )}
         <button
           class="nav-btn"
+          onClick={() => void browserActions.openTab("cntrl://bookmarks")}
+          title="Bookmark Page / View Bookmarks"
+          aria-label="Bookmarks"
+        >
+          <BookmarkIcon />
+        </button>
+        <button
+          class="nav-btn"
           onClick={handleOpenExternal}
           title="Open in External Browser"
           aria-label="Open in external browser"
         >
-          <span>Open</span>
-        </button>{" "}
+          <ExternalLinkIcon />
+        </button>
         <button
           class="settings-icon-btn"
           onClick={handleOpenSettings}

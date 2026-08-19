@@ -1,6 +1,12 @@
 import { invoke } from "@tauri-apps/api/core";
 import { Component, createEffect, createSignal, onCleanup, onMount } from "solid-js";
 import { browserActions, browserState } from "../stores/browserStore";
+import { AuditViewer } from "./AuditViewer";
+import { BookmarksPage } from "./BookmarksPage";
+import { DownloadsPage } from "./DownloadsPage";
+import { HistoryPage } from "./HistoryPage";
+import { HomePage } from "./HomePage";
+import { PluginManager } from "./PluginManager";
 import { SettingsPage } from "./SettingsPage";
 import "./WebView.css";
 
@@ -48,7 +54,7 @@ export const WebView: Component = () => {
     const activeTab = browserState.tabs.find((t) => t.id === browserState.activeTabId);
     updateBounds();
 
-    if (!activeTab || activeTab.url === "about:blank") {
+    if (!activeTab || activeTab.url === "about:blank" || activeTab.url.startsWith("cntrl://")) {
       setHtmlContent("");
       return;
     }
@@ -73,12 +79,23 @@ export const WebView: Component = () => {
   });
 
   const activeTab = () => browserState.tabs.find((t) => t.id === browserState.activeTabId);
+  const currentUrl = () => activeTab()?.url || "cntrl://home";
 
   return (
     <div class="webview-container" ref={containerRef}>
-      {activeTab()?.url === "cntrl://settings" && <SettingsPage />}
+      {/* Internal cntrl:// router */}
+      {(currentUrl() === "cntrl://home" ||
+        currentUrl() === "cntrl://newtab" ||
+        currentUrl() === "about:blank") && <HomePage />}
+      {currentUrl() === "cntrl://settings" && <SettingsPage />}
+      {currentUrl() === "cntrl://plugins" && <PluginManager />}
+      {currentUrl() === "cntrl://audit" && <AuditViewer />}
+      {currentUrl() === "cntrl://history" && <HistoryPage />}
+      {currentUrl() === "cntrl://downloads" && <DownloadsPage />}
+      {currentUrl() === "cntrl://bookmarks" && <BookmarksPage />}
 
-      {activeTab()?.fallback_mode && activeTab()?.url !== "cntrl://settings" && (
+      {/* Playwright sandboxed fallback for external URLs */}
+      {activeTab()?.fallback_mode && !currentUrl().startsWith("cntrl://") && (
         <>
           {isLoading() && <div class="loading">Loading compatibility mode...</div>}
           {error() && <div class="error">{error()}</div>}
@@ -90,12 +107,6 @@ export const WebView: Component = () => {
             ></iframe>
           )}
         </>
-      )}
-      {!activeTab() && (
-        <div class="empty-state">
-          <h1>CNTRL BROWSER</h1>
-          <p>Intent-based autonomous browsing</p>
-        </div>
       )}
     </div>
   );

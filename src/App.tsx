@@ -1,7 +1,10 @@
 import { listen } from "@tauri-apps/api/event";
 import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 import { CommandBar } from "./components/CommandBar";
+import { FindInPage } from "./components/FindInPage";
+import { FirstRunConsent } from "./components/FirstRunConsent";
 import { MacroLibrary } from "./components/MacroLibrary";
+import { ShortcutsModal } from "./components/ShortcutsModal";
 import { TabBar } from "./components/TabBar";
 import { UrlBar } from "./components/UrlBar";
 import { WebView } from "./components/WebView";
@@ -13,6 +16,9 @@ import "./App.css";
 
 function App() {
   const [showMacroLibrary, setShowMacroLibrary] = createSignal(false);
+  const [showShortcuts, setShowShortcuts] = createSignal(false);
+  const [showFind, setShowFind] = createSignal(false);
+  const [showConsent, setShowConsent] = createSignal(false);
   const [theme, setTheme] = createSignal<"dark" | "light">("dark");
 
   createEffect(() => {
@@ -24,7 +30,12 @@ function App() {
     await macroActions.init();
     await browserActions.fetchTabs();
     if (browserState.tabs.length === 0) {
-      await browserActions.openTab("https://google.com");
+      await browserActions.openTab("cntrl://home");
+    }
+
+    const consentAccepted = localStorage.getItem("cntrl_consent_accepted");
+    if (!consentAccepted) {
+      setShowConsent(true);
     }
 
     const unlistenCmdW = await listen<null>("cmd-w", () => {
@@ -38,7 +49,7 @@ function App() {
 
       if (e.key === "t" && !e.shiftKey) {
         e.preventDefault();
-        eventBus.emit("TAB_OPEN_NEW", { url: "about:blank" });
+        eventBus.emit("TAB_OPEN_NEW", { url: "cntrl://home" });
       } else if (e.key === "w") {
         e.preventDefault();
         eventBus.emit("TAB_CLOSE_ACTIVE");
@@ -49,9 +60,17 @@ function App() {
         e.preventDefault();
         setShowMacroLibrary((prev) => !prev);
       } else if (e.key === "L" && e.shiftKey) {
-        // Cmd+Shift+L to toggle light/dark theme
         e.preventDefault();
         setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+      } else if (e.key === "/") {
+        e.preventDefault();
+        setShowShortcuts((prev) => !prev);
+      } else if (e.key === "f") {
+        e.preventDefault();
+        setShowFind((prev) => !prev);
+      } else if (e.key === "p") {
+        e.preventDefault();
+        window.print();
       }
     };
 
@@ -62,12 +81,21 @@ function App() {
     });
   });
 
+  const handleAcceptConsent = () => {
+    localStorage.setItem("cntrl_consent_accepted", "true");
+    setShowConsent(false);
+  };
+
   return (
     <div class="app-container">
       <TabBar />
       <UrlBar />
       <WebView />
       <CommandBar />
+
+      <Show when={showFind()}>
+        <FindInPage onClose={() => setShowFind(false)} />
+      </Show>
 
       <Show when={macroState.isRecording}>
         <div
@@ -81,6 +109,14 @@ function App() {
 
       <Show when={showMacroLibrary()}>
         <MacroLibrary onClose={() => setShowMacroLibrary(false)} />
+      </Show>
+
+      <Show when={showShortcuts()}>
+        <ShortcutsModal onClose={() => setShowShortcuts(false)} />
+      </Show>
+
+      <Show when={showConsent()}>
+        <FirstRunConsent onAccept={handleAcceptConsent} />
       </Show>
     </div>
   );

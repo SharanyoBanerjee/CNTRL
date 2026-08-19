@@ -47,6 +47,7 @@ pub struct BrowserState {
 pub struct BrowserService {
     state: Arc<RwLock<BrowserState>>,
     config: Arc<RwLock<BrowserConfig>>,
+    chromium: crate::services::chromium::ChromiumManager,
 }
 
 impl Default for BrowserService {
@@ -60,7 +61,12 @@ impl BrowserService {
         Self {
             state: Arc::new(RwLock::new(BrowserState::default())),
             config: Arc::new(RwLock::new(BrowserConfig::default())),
+            chromium: crate::services::chromium::ChromiumManager::new(),
         }
+    }
+
+    pub fn chromium(&self) -> &crate::services::chromium::ChromiumManager {
+        &self.chromium
     }
 
     pub fn open_tab<R: tauri::Runtime>(
@@ -193,7 +199,11 @@ impl BrowserService {
                 }
             }
             if let Some(w) = app.get_webview(&label) {
-                let _ = w.show();
+                if !url.starts_with("cntrl://") && url != "about:blank" {
+                    let _ = w.show();
+                } else {
+                    let _ = w.hide();
+                }
             }
         }
 
@@ -299,11 +309,11 @@ impl BrowserService {
                 }
             }
             if let Some(tab) = state.tabs.iter().find(|t| t.id == id) {
-                if !tab.url.starts_with("cntrl://") && !tab.fallback_mode {
+                if !tab.url.starts_with("cntrl://") && tab.url != "about:blank" && !tab.fallback_mode {
                     if let Some(w) = app.get_webview(&format!("tab-{}", id)) {
                         let _ = w.show();
                     }
-                } else if tab.url.starts_with("cntrl://") {
+                } else if tab.url.starts_with("cntrl://") || tab.url == "about:blank" {
                     if let Some(w) = app.get_webview(&format!("tab-{}", id)) {
                         let _ = w.hide();
                     }

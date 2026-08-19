@@ -3,6 +3,7 @@ pub mod ai;
 pub mod audit;
 pub mod background;
 pub mod browser;
+pub mod chromium;
 pub mod executor;
 pub mod fallback;
 pub mod intent;

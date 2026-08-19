@@ -2,7 +2,7 @@
 
 ## 1. System Overview
 
-CNTRL Browser is built on a hybrid architecture combining a high-performance **Rust backend** (powered by Tauri v2) and a reactive **SolidJS frontend** (TypeScript).
+CNTRL Browser is built on a hybrid architecture combining a high-performance **Rust backend** (powered by Tauri v2), a unified **Chromium Base Engine** (controlled via Chrome DevTools Protocol / CDP), and a reactive **SolidJS frontend** (TypeScript).
 
 ```text
 ┌──────────────────────────────────────────────────────────────────┐
@@ -15,12 +15,17 @@ CNTRL Browser is built on a hybrid architecture combining a high-performance **R
 │                                                                  │
 │  ┌─────────────────┐   ┌──────────────────┐   ┌───────────────┐ │
 │  │ BrowserService  │   │  AI Model Router │   │ Memory Engine │ │
-│  │ (Child Webviews)│   │ (Ollama/Cloud)   │   │ (SQLite/Lance)│ │
+│  │ & Chromium CDP  │   │ (Ollama/Cloud)   │   │ (SQLite/Lance)│ │
 │  └─────────────────┘   └──────────────────┘   └───────────────┘ │
 │  ┌─────────────────┐   ┌──────────────────┐   ┌───────────────┐ │
 │  │ Intent Planner  │   │ Background Agent │   │ Keychain &    │ │
 │  │ & Executor      │   │ Queue (Tokio)    │   │ Privacy Guard │ │
 │  └─────────────────┘   └──────────────────┘   └───────────────┘ │
+└────────────────────────────────┬─────────────────────────────────┘
+                                 │ Chrome DevTools Protocol (CDP)
+┌────────────────────────────────▼─────────────────────────────────┐
+│                    Chromium Base Engine Target                   │
+│   (Page Navigation, DOM Inspection, Target & Cookie Management)  │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -31,6 +36,7 @@ CNTRL Browser is built on a hybrid architecture combining a high-performance **R
 | Layer | Technology | Rationale |
 |---|---|---|
 | **Desktop Shell** | Tauri v2 | Lightweight binary size, native performance, low memory footprint. |
+| **Browser Engine** | Chromium (CDP) | Unified rendering across macOS/Windows/Linux, deep automation, extension capability. |
 | **Backend Language** | Rust 2021 | Memory safety, speed, strict type correctness. |
 | **Frontend Framework** | SolidJS + TypeScript | Fine-grained reactivity, zero virtual DOM overhead, small bundle. |
 | **Relational DB** | SQLite (`sqlx`) | Embedded, serverless, transactional persistence for preferences & logs. |
@@ -60,9 +66,10 @@ CNTRL/
 ├── src-tauri/                # Rust Backend
 │   ├── src/
 │   │   ├── commands/         # Tauri IPC Command Handlers
-│   │   ├── services/         # Core Logic Services (browser, ai, memory, etc.)
+│   │   ├── services/         # Core Logic Services (browser, chromium, ai, memory, etc.)
 │   │   │   ├── ai/           # LLM Providers (Ollama, Gemini, Groq, HF, OpenAI)
 │   │   │   ├── background/   # Tokio Background Worker Queue
+│   │   │   ├── chromium.rs   # Chromium Process & CDP Controller
 │   │   │   ├── intent/       # Natural Language Classification
 │   │   │   ├── memory/       # SQLite & LanceDB Services
 │   │   │   └── plugin/       # WASM Runtime Sandbox
@@ -77,12 +84,13 @@ CNTRL/
 
 ## 4. Key Execution Flows
 
-### 4.1 Tab Lifecycle & Webview Management
+### 4.1 Tab Lifecycle & Chromium CDP Engine Management
 1. User requests a new tab via UI or `Cmd+T`.
 2. `browserStore.ts` calls Rust `open_tab` command.
-3. `BrowserService` creates a native OS child webview attached to the main window (`tab-{uuid}`).
-4. `WebView.tsx` measures container bounds and dispatches `update_tab_bounds` to Rust.
-5. Rust applies `LogicalPosition` and `LogicalSize` on the main thread via `app.run_on_main_thread`.
+3. `BrowserService` uses `ChromiumManager` (`src-tauri/src/services/chromium.rs`) to discover or manage a Chromium target.
+4. `ChromiumManager` emits CDP JSON-RPC commands (`Target.createTarget`, `Page.navigate`) over WebSocket.
+5. `WebView.tsx` measures container bounds and dispatches `update_tab_bounds` to Rust.
+6. Rust applies `LogicalPosition` and `LogicalSize` on the main thread via `app.run_on_main_thread`.
 
 ### 4.2 Intent Pipeline Execution
 1. User types natural language query into `CommandBar.tsx` (`Cmd+K`).

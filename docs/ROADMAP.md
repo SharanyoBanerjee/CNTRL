@@ -1,119 +1,54 @@
-# Roadmap
+# Production Roadmap — CNTRL Browser
 
-This roadmap reflects the current repository state and the original phased build plan.
+This document outlines the current version status and future development milestones for CNTRL Browser.
 
-## Phase 1: Project Scaffold and CI Pipeline
+---
 
-Status: complete or mostly complete.
+## 🚀 v0.2.0-beta (Current Version — Completed)
 
-- Tauri v2 app scaffold.
-- SolidJS frontend.
-- TypeScript and Vite setup.
-- Biome formatting setup.
-- Frontend test setup.
-- Rust project setup.
+### Phase 0 — Stabilize & CI
+- [x] 100% Green CI pipeline (`cargo check`, `eslint`, `biome`, `typecheck`, `vitest`).
+- [x] Triage open issues & set v0.x beta milestone scope.
 
-Recommended next step:
+### Phase 1 — Foundation
+- [x] Internal `cntrl://` router mounted in frontend & IPC backend.
+- [x] Built-in pages mounted: `SettingsPage`, `PluginManager`, `AuditViewer`.
+- [x] CNTRL custom landing page (`cntrl://home` / `cntrl://newtab`).
 
-- Add public CI workflows for frontend tests, Rust tests, formatting, and build checks.
+### Phase 2 — Baseline Browser Features
+- [x] History Manager (`cntrl://history` & date search).
+- [x] Downloads Manager (`cntrl://downloads` & status monitoring).
+- [x] Bookmarks Manager (`cntrl://bookmarks` & star in `UrlBar.tsx`).
+- [x] Find in Page (`Cmd+F`) & Zoom shortcuts (`Cmd +/-/0`).
+- [x] Keyboard Shortcuts Sheet (`Cmd+/` / `cntrl://shortcuts`).
+- [x] HTTPS lock details & HTTP security warning indicator.
+- [x] Print / Save as PDF command (`Cmd+P`).
 
-## Phase 2: Webview Engine and Browser Chrome
+### Phase 3 — Trust & Release Blockers
+- [x] Wasmtime plugin sandbox isolation & safety labeling.
+- [x] AI Intent confirmation guardrail modal (`GuardrailDialog.tsx`).
+- [x] Privacy Policy & First-Run Consent modal (`FirstRunConsent.tsx`).
+- [x] Clear Memory DB & Audit Log in Settings.
+- [x] Security review & `SECURITY.md` disclosure contact (`security@cntrl-browser.org`).
 
-Status: complete or mostly complete.
+### Phase 4 — Identity, Settings & Accessibility
+- [x] Brand icons wired into `tauri.conf.json`.
+- [x] Full Settings surface (Appearance, Shortcuts, Language, Accessibility, Performance, Privacy, AI Router, OS Handlers).
+- [x] High-contrast theme (`data-theme="high-contrast"`), font scaling multipliers, and screen-reader ARIA tags.
 
-- Tab bar.
-- URL bar.
-- Native child webviews.
-- Active/inactive tab visibility.
-- Navigation commands.
-- Back, forward, and reload commands.
-- Compatibility fallback mode.
+---
 
-Recommended next step:
+## 🔮 Deferred to v1.1 Release
 
-- Add tests around tab lifecycle, active tab switching, fallback mode, and bounds updates.
+The following complex browser features are intentionally deferred to the `v1.1` milestone:
 
-## Phase 3: Hybrid Brain and Model Router
-
-Status: complete prototype.
-
-- AI settings page.
-- Local Ollama config.
-- OpenRouter key flow.
-- Free model discovery.
-- Premium model selection scaffolding.
-- AI request test.
-- Intent-tier scoring.
-
-Recommended next step:
-
-- Clarify provider naming, error states, and storage guarantees.
-- Add tests for config updates and intent-tier scoring.
-
-## Phase 4: Intent Layer and Command Bar
-
-Status: planned.
-
-Goals:
-
-- Natural-language command bar.
-- Intent parsing.
-- User confirmation model for risky actions.
-- Mapping between intent results and browser operations.
-- Safe failure states.
-
-## Phase 5: Memory Engine and Security Layer
-
-Status: planned.
-
-Goals:
-
-- Local memory store.
-- User-controlled retention.
-- Permission model for remembered context.
-- Browser data boundaries.
-- CSP hardening.
-- Better secret storage.
-- Security documentation and tests.
-
-## Phase 6: Background Agents and Macro Recorder
-
-Status: planned.
-
-Goals:
-
-- Background task queue.
-- Agent status UI.
-- User approval checkpoints.
-- Macro recording.
-- Macro replay safeguards.
-- Task cancellation and audit logs.
-
-## Phase 7: Design System, Plugin SDK, and OSS Release
-
-Status: planned.
-
-Goals:
-
-- Stable design tokens.
-- Component polish.
-- Plugin API design.
-- Extension or plugin examples.
-- Public documentation.
-- Public issue templates.
-- Release workflow.
-- Signed binaries if distribution is planned.
-
-## Suggested Open-Source Milestone
-
-Before the first public announcement:
-
-- Replace placeholder package metadata.
-- Add license and maintainer information.
-- Add CI.
-- Add a security contact.
-- Tighten Tauri CSP and permissions.
-- Add contribution guidelines.
-- Add issue and PR templates.
-- Add tests around browser and AI-router behavior.
-- Remove stale references to React or Zustand; the app uses SolidJS and Solid stores.
+1. **Incognito / Private Browsing Windows**
+2. **Granular Cookie & Domain Permission Manager**
+3. **Autofill & Saved Password Enclave**
+4. **On-Device Machine Translation**
+5. **Vertical Tab Strip Option**
+6. **Distraction-Free Reader Mode**
+7. **Tab Suspender for Low-Memory Modes**
+8. **Split-Screen Dual View Engine**
+9. **Multi-Workspace Environment Isolation**
+10. **Page Annotation & Markup Tools**

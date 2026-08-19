@@ -28,6 +28,20 @@
   --color-text-success: #308c30;
 }
 
+[data-theme="high-contrast"] {
+  --color-bg-base: #000000;
+  --color-bg-panel: #000000;
+  --color-bg-elevated: #111111;
+  --color-border: #ffffff;
+  --color-border-active: #ffff00;
+  --color-accent: #ffff00;
+  --color-accent-dim: #888800;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #ffffff;
+  --color-text-danger: #ff0000;
+  --color-text-success: #00ff00;
+}
+
 .tab-bar {
   height: 38px;
   display: flex;

@@ -21,7 +21,8 @@ Detailed architectural, PRD, and development documentation can be found in the [
 
 ## ✨ Features
 
-- 🌐 **Native Webview Engine**: Lightweight native browser tabs on macOS (WebKit), Windows (WebView2), and Linux (WebKitGTK).
+- 🌐 **Chromium Base Engine**: Unified Chromium engine layer (`ChromiumManager` via CDP) for consistent rendering, network inspection, and DOM automation.
+- 📱 **Native Webview Engine**: Lightweight native browser tabs on macOS, Windows, and Linux.
 - 🛡️ **Playwright Fallback**: Sandboxed fallback engine for complex or WebKit-hostile web pages.
 - 🧠 **3-Tier AI Router**: Seamless execution across Tier 1 (Ollama), Tier 2 (Gemini, Groq, HF), and Tier 3 (OpenAI-compatible endpoints).
 - 🔐 **OS Keychain Enclave**: 100% encrypted credential storage in macOS Keychain, Windows Credential Manager, and Linux Secret Service.

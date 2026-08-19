@@ -1,0 +1,74 @@
+.guardrail-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+
+.guardrail-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-danger);
+  border-radius: 12px;
+  width: 440px;
+  max-width: 90vw;
+  padding: 24px;
+  box-shadow: 0 16px 32px rgba(255, 71, 87, 0.2);
+  color: var(--color-text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.guardrail-badge {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--color-danger);
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.guardrail-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.guardrail-msg {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.guardrail-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.btn-cancel {
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.btn-confirm {
+  background: var(--color-danger);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+}

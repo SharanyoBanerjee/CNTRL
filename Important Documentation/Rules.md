@@ -10,6 +10,7 @@ These rules govern all past, present, and future development on CNTRL Browser. B
 2. **Zero Plaintext Secrets**: NEVER write API keys, passwords, or authentication tokens to flat files, JSON configs, or logs. Always use the `keychain` service module.
 3. **No Silent Failures**: All error paths in Rust and TypeScript must either surface to the user via UI/notifications or be logged explicitly with contextual error types (`CntrlError`).
 4. **Decoupled Event Bus**: UI components must interact through state stores (`stores/`) or the decoupled `eventBus` (`core/events.ts`). Never pollute UI components with raw backend logic.
+5. **Unified Engine Architecture**: Browser target rendering, DOM inspection, and tab lifecycle operations must route through `ChromiumManager` / CDP (`src-tauri/src/services/chromium.rs`).
 
 ---
 
@@ -17,7 +18,7 @@ These rules govern all past, present, and future development on CNTRL Browser. B
 
 ### Allowed Stack
 - **Frontend**: SolidJS, TypeScript (strict), Vanilla CSS (custom properties).
-- **Backend**: Rust 2021, Tauri v2, Tokio, SQLite (`sqlx`), LanceDB, Wasmtime, Keyring.
+- **Backend**: Rust 2021, Tauri v2, Chromium (CDP), Tokio, SQLite (`sqlx`), LanceDB, Wasmtime, Keyring.
 
 ### Explicitly Forbidden
 - **No Tailwind CSS**: Use Vanilla CSS custom property design tokens in `src/styles/tokens.css`.
@@ -26,9 +27,10 @@ These rules govern all past, present, and future development on CNTRL Browser. B
 
 ---
 
-## 3. Rust Code Standards
+## 3. Rust & Chromium CDP Standards
 
 - **Error Handling**: Use `thiserror` in `error.rs`. Derive `#[from]` for third-party errors (`std::io::Error`, `sqlx::Error`).
+- **Chromium Process Isolation**: Chromium instances must launch with `--no-first-run --no-default-browser-check --remote-debugging-port=...`.
 - **UI Thread Safety**: Any Webview layout or native window manipulation MUST run inside `app.run_on_main_thread(...)`.
 - **Async Safety**: Avoid blocking the main thread. Long operations must use `tokio::spawn` or the `BackgroundRuntime`.
 

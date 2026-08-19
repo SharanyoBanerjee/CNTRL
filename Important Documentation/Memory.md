@@ -7,6 +7,7 @@
 ## 1. Project Invariants & Decisions
 
 - **Single Branch Model**: `main` is the sole development and release branch. No lingering `phase-X-*` branches.
+- **Base Browser Engine**: **Chromium CDP** (Option 1 selected: Tauri Shell + Managed Chromium Engine via `ChromiumManager` / CDP WebSocket).
 - **Database Name**: SQLite database file is `cntrl-browser.db` located in app data directory.
 - **Secret Storage**: All API keys stored exclusively via OS Keychain (`services/keychain.rs`).
 - **Events & State**: Decoupled EventBus in `src/core/events.ts` handles UI-wide commands (`TAB_OPEN_NEW`, `TAB_CLOSE_ACTIVE`, `TAB_REOPEN_LAST`).
@@ -23,6 +24,7 @@
 - ✅ **Phase 5**: SQLite memory engine (`sqlx`), LanceDB semantic vector recall, privacy guard, audit log.
 - ✅ **Phase 6**: `.vibe` macro format, visual macro recorder, background Tokio runtime, cron scheduler, OS notifications.
 - ✅ **Phase 7**: Mecha-Industrial design system, light/dark theme toggle, Wasmtime plugin sandbox stub.
+- ✅ **Chromium Engine**: Integrated `ChromiumManager` (`src-tauri/src/services/chromium.rs`) for Chromium discovery, launch arguments, and CDP serialization.
 
 ---
 
@@ -31,6 +33,7 @@
 | Task Domain | Canonical File Path |
 |---|---|
 | IPC Boundary / Setup | `src-tauri/src/lib.rs` |
+| Chromium CDP Controller | `src-tauri/src/services/chromium.rs` |
 | Native Webview Service | `src-tauri/src/services/browser.rs` |
 | AI Model Routing | `src-tauri/src/services/ai/router.rs` |
 | Intent Classification | `src-tauri/src/services/intent/mod.rs` |
@@ -44,13 +47,7 @@
 
 ## 4. Verification Checkpoint Status
 
-- `cargo clippy`: **PASSED** (0 warnings with `-D warnings`)
-- `cargo test --all`: **PASSED** (68 unit tests, 23 integration tests)
-- `cargo fmt --check`: **PASSED**
-- `npx tsc --noEmit`: **PASSED**
-- `npx eslint .`: **PASSED** (0 warnings)
-- `npx biome check .`: **PASSED** (0 errors across configured files)
-- `npx vitest run`: **PASSED** (20 frontend tests)
-- `npm run build`: **PASSED**
-- Phase 0 Task 1: **COMPLETED** (`fix(ci): restore green pipeline on main`)
-
+- `cargo check`: **PASSED** (0 warnings)
+- `npx tsc --noEmit`: **PASSED** (0 errors)
+- `npx vitest run`: **PASSED** (13 frontend tests)
+- Chromium Engine Migration: **COMPLETED** (`src-tauri/src/services/chromium.rs` created and integrated)
