@@ -1,7 +1,6 @@
 import { Component, createSignal, For } from "solid-js";
-import { eventBus } from "../core/events";
 import { aiState } from "../stores/aiStore";
-import { browserActions } from "../stores/browserStore";
+import { browserActions, browserState } from "../stores/browserStore";
 import {
   AuditIcon,
   BookmarkIcon,
@@ -15,22 +14,31 @@ import "./HomePage.css";
 export const HomePage: Component = () => {
   const [intentInput, setIntentInput] = createSignal("");
 
+  const navigateActiveOrOpen = (targetUrl: string) => {
+    let url = targetUrl.trim();
+    if (!url) return;
+
+    if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("cntrl://")) {
+      if (url.includes(".") && !url.includes(" ")) {
+        url = `https://${url}`;
+      } else {
+        url = `https://duckduckgo.com/?q=${encodeURIComponent(url)}`;
+      }
+    }
+
+    if (browserState.activeTabId) {
+      void browserActions.navigate(browserState.activeTabId, url);
+    } else {
+      void browserActions.openTab(url);
+    }
+  };
+
   const handleIntentSubmit = (e: Event) => {
     e.preventDefault();
     const query = intentInput().trim();
     if (!query) return;
 
-    if (
-      query.startsWith("http://") ||
-      query.startsWith("https://") ||
-      query.startsWith("cntrl://")
-    ) {
-      void browserActions.openTab(query);
-    } else {
-      eventBus.emit("TAB_OPEN_NEW", {
-        url: `https://duckduckgo.com/?q=${encodeURIComponent(query)}`,
-      });
-    }
+    navigateActiveOrOpen(query);
     setIntentInput("");
   };
 
@@ -48,19 +56,19 @@ export const HomePage: Component = () => {
       <div class="cntrl-home-content">
         <div class="cntrl-logo-badge">
           <span class="logo-text">CNTRL</span>
-          <span class="logo-sub">AUTONOMOUS BROWSER v0.1.0</span>
+          <span class="logo-sub">AUTONOMOUS BROWSER v0.2.0</span>
         </div>
 
         <form class="cntrl-intent-box" onSubmit={handleIntentSubmit}>
           <input
             type="text"
-            placeholder="Type a URL or natural language intent (e.g., 'Summarize news', 'Find GitHub trends')..."
+            placeholder="Search, enter URL, or type an intent (e.g. 'google.com', 'news', 'cntrl://settings')..."
             value={intentInput()}
             onInput={(e) => setIntentInput(e.currentTarget.value)}
             class="cntrl-intent-input"
           />
           <button type="submit" class="cntrl-intent-submit">
-            Execute
+            Navigate
           </button>
         </form>
 
@@ -75,7 +83,7 @@ export const HomePage: Component = () => {
           </div>
           <div class="status-item">
             <span class="status-dot active" />
-            Active Model: <code>{aiState.selected_model}</code>
+            Engine: <code>Chromium CDP</code>
           </div>
         </div>
 
@@ -84,7 +92,7 @@ export const HomePage: Component = () => {
             {(item) => {
               const IconComp = item.icon;
               return (
-                <button class="quick-card" onClick={() => void browserActions.openTab(item.url)}>
+                <button class="quick-card" onClick={() => navigateActiveOrOpen(item.url)}>
                   <span class="quick-icon">
                     <IconComp />
                   </span>

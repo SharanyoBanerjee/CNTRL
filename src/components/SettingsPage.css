@@ -294,8 +294,19 @@
   color: var(--color-text-primary);
   transition:
     border-color 120ms ease-out,
-    color 120ms ease-out;
+    color 120ms ease-out,
+    transform 100ms ease;
   white-space: nowrap;
+}
+
+.sp-btn:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  transform: translateY(-1px);
+}
+
+.sp-btn:active:not(:disabled) {
+  transform: scale(0.96) !important;
 }
 
 .sp-btn:hover:not(:disabled) {

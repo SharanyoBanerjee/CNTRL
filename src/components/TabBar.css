@@ -1,3 +1,16 @@
+@keyframes tabEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(-2px);
+    max-width: 0px;
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    max-width: 200px;
+  }
+}
+
 .tab {
   display: flex;
   align-items: center;
@@ -16,9 +29,18 @@
   font-size: 12px;
   cursor: pointer;
   -webkit-app-region: no-drag;
+  animation: tabEnter 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
   transition:
-    border-color 120ms ease-out,
-    color 120ms ease-out;
+    border-color 150ms ease-out,
+    color 150ms ease-out,
+    background-color 150ms ease-out,
+    flex 180ms ease-out,
+    transform 120ms ease;
+}
+
+.tab:hover {
+  border-color: var(--color-border-active);
+  color: var(--color-text-primary);
 }
 
 .tab.active {
@@ -67,12 +89,14 @@
   width: 16px;
   transition:
     border-color 120ms ease-out,
-    color 120ms ease-out;
+    color 120ms ease-out,
+    transform 100ms ease;
 }
 
 .tab .close-btn:hover {
   border-color: var(--color-text-danger);
   color: var(--color-text-danger);
+  transform: scale(1.1);
 }
 
 .new-tab-btn {
@@ -92,10 +116,12 @@
   justify-content: center;
   transition:
     border-color 120ms ease-out,
-    color 120ms ease-out;
+    color 120ms ease-out,
+    transform 100ms ease;
 }
 
 .new-tab-btn:hover {
   border-color: var(--color-border-active);
   color: var(--color-text-primary);
+  transform: scale(1.05);
 }

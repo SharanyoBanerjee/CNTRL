@@ -15,7 +15,12 @@ export const [aiState, setAiState] = createStore<ModelConfig>({
 });
 export const initAiStore = async (): Promise<void> => {};
 export const askAi = async (prompt: string): Promise<string> => {
-  return invoke<string>("ask_ai", { prompt });
+  try {
+    return await invoke<string>("ask_ai", { prompt });
+  } catch (error) {
+    console.warn("AI Model unavailable, using standalone browser mode:", error);
+    return `[Standalone Mode] Result for "${prompt}": Opening search query on DuckDuckGo.`;
+  }
 };
 export const getHfModels = async (): Promise<string[]> => {
   const cached = modelCache.get("hf_models");
